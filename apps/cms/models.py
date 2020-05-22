@@ -1,5 +1,5 @@
 from datetime import datetime
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from exts import db
 
 
@@ -19,8 +19,15 @@ class CMSUser(db.Model):
 
     @property
     def password(self):
+        '''获取密码'''
         return self._password
 
     @password.setter
     def password(self, raw_password):
+        '''设置密码'''
         self._password = generate_password_hash(raw_password)
+
+    def check_password(self, raw_password):
+        '''验证密码是否正确'''
+        result = check_password_hash(self.password, raw_password)
+        return result

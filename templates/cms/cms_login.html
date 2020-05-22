@@ -16,7 +16,6 @@
 
     <!-- Custom styles for this template -->
     <link href="{{ url_for('static', filename='cms/css/signin.css') }}" rel="stylesheet">
-    <![endif]-->
 </head>
 
 <body>
@@ -24,6 +23,7 @@
 <div class="container">
 
     <form class="form-signin" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <h2 class="form-signin-heading">请登录</h2>
         <label for="inputEmail" class="sr-only">邮箱地址</label>
         <input type="email" id="inputEmail" class="form-control" name="email" placeholder="邮箱地址" required autofocus>
@@ -31,14 +31,16 @@
         <input type="password" id="inputPassword" class="form-control" name="password" placeholder="密码" required>
         <div class="checkbox">
             <label>
-                <input type="checkbox" value="remember-me" name="remember"> 记住我
+                <input type="checkbox" value="1" name="remember"> 记住我
             </label>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">立即登录</button>
     </form>
+    {% if message %}
+        <p style="text-align: center" class="text-danger">{{ message }}</p>
+    {% endif %}
 
 </div> <!-- /container -->
-
 
 </body>
 </html>

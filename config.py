@@ -1,3 +1,5 @@
+import os
+
 # 数据库连接配置
 HOSTNAME = '127.0.0.1'
 PORT = 3306
@@ -8,3 +10,8 @@ DB_URL = 'mysql+mysqlconnector://{}:{}@{}:{}/{}?charset=utf8'.format(USERNAME, P
 
 SQLALCHEMY_DATABASE_URI = DB_URL
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+SQLALCHEMY_POOL_RECYCLE = 280
+SQLALCHEMY_POOL_SIZE = 20
+
+# 设置密钥
+SECRET_KEY = os.urandom(15)
