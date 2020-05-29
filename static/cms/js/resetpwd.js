@@ -14,7 +14,7 @@ $(function () {
 
         // 1. 要在模版的meta标签中渲染一个csrf-token
         // 2. 在ajax请求的头部中设置X-CSRFtoken
-        var lgajax = {
+        var clajax = {
             'get': function (args) {
                 args['method'] = 'get';
                 this.ajax(args);
@@ -32,8 +32,8 @@ $(function () {
                 $.ajaxSetup({
                     'beforeSend': function (xhr, settings) {
                         if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-//                            var csrftoken = $('meta[name=csrf-token]').attr('content');
-                            var csrftoken = $('input[name=csrf-token]').attr('value');
+                            var csrftoken = $('meta[name=csrf-token]').attr('content');
+                            // var csrftoken = $('input[name=csrf-token]').attr('value');
                             xhr.setRequestHeader("X-CSRFToken", csrftoken)
                         }
                     }
@@ -41,7 +41,8 @@ $(function () {
             }
         };
 
-        lgajax.post({
+        // 表单提交方式是post方法
+        clajax.post({
             'url': '/cms/resetpwd/',
             'data': {
                 'oldpwd': oldpwd,
@@ -49,10 +50,20 @@ $(function () {
                 'newpwd2': newpwd2
             },
             'success': function (data) {
-                console.log(data);
+                // console.log(data);
+                if (data['code'] === 200) {
+                    clalert.alertSuccess('密码修改成功');
+                    oldpwd.val("");
+                    newpwd.val("");
+                    newpwd2.val("");
+                } else {
+                    var message = data['message'];
+                    clalert.alertInfo(message)
+                }
             },
             'fail': function (error) {
-                console.log(error);
+                // console.log(error);
+                clalert.alertNetworkError();
             }
         });
     });

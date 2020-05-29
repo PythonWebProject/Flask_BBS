@@ -1,6 +1,9 @@
-from flask import Blueprint, render_template, views, request, redirect, url_for, session
-from apps.cms.forms import LoginForm
+from flask import Blueprint, render_template, views, request, redirect, url_for, session, g
+from apps.cms.forms import LoginForm, ResetPwdForm
 from apps.cms.models import CMSUser
+from exts import db
+from utils import restful
+
 # from .decorators import login_required  # .代表当前路径
 
 cms_bp = Blueprint('cms', __name__, url_prefix='/cms')
@@ -53,7 +56,40 @@ class LoginView(views.MethodView):
                 return self.get(message='邮箱或密码有误')
         else:
             print(login_form.errors)
-            return self.get(message=login_form.errors.popitem()[1][0])
+            return self.get(message=login_form.get_error())
+
+
+class ResetPwdView(views.MethodView):
+    def get(self):
+        return render_template('cms/cms_resetpwd.html')
+
+    def post(self):
+        form = ResetPwdForm(request.form)
+        if form.validate():
+            oldpwd = form.oldpwd.data
+            newpwd = form.newpwd.data
+            # 获取当前用户
+            user = g.cms_user
+            if user.check_password(oldpwd):
+                # 密码验证通过，则修改密码
+                user.password = newpwd
+                db.session.commit()
+                return restful.success()
+            else:
+                return restful.params_error(message='旧密码错误')
+        else:
+            # 当给Ajax返回数据时，要返回json格式的数据
+            return restful.params_error(message=form.get_error())
+
+
+class ResetEmailView(views.MethodView):
+    def get(self):
+        return render_template('cms/cms_resetemail.html')
+
+    def post(self):
+        pass
 
 
 cms_bp.add_url_rule('/login/', view_func=LoginView.as_view('login'))
+cms_bp.add_url_rule('/resetpwd/', view_func=ResetPwdView.as_view('resetpwd'))
+cms_bp.add_url_rule('/resetemail/', view_func=ResetEmailView.as_view('resetemail'))
