@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, views, request, redirect, url_for, session, g
-from apps.cms.forms import LoginForm, ResetPwdForm
+from flask_mail import Message
+from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm
 from apps.cms.models import CMSUser
-from exts import db
-from utils import restful
+from exts import db, mail
+from utils import restful, random_captcha, clcache
 
 # from .decorators import login_required  # .代表当前路径
 
@@ -87,9 +88,35 @@ class ResetEmailView(views.MethodView):
         return render_template('cms/cms_resetemail.html')
 
     def post(self):
-        pass
+        form = ResetEmailForm(request.form)
+        if form.validate():
+            email = form.email.data
+            # 修改用户邮箱
+            g.cms_user.email = email
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.params_error(form.get_error())
+
+
+class EmailCaptchaView(views.MethodView):
+    def get(self):
+        email = request.args.get('email')
+        if not email:
+            return restful.params_error('请传递邮箱参数')
+        # 发送邮件验证码，可以是4位或6位的数字与英文组合
+        captcha = random_captcha.get_random_captcha(4)
+        try:
+            message = Message('熊熊论坛验证码', recipients=[email], body='您正在进行更改邮箱验证，验证码是%s，5分钟内有效，请及时输入、注意保密。' % captcha)
+            mail.send(message)
+        except Exception as e:
+            print(e.args[0])
+            return restful.server_error('邮件发送异常，请检查重试')
+        clcache.save_captcha(email, captcha)
+        return restful.success(message='邮件发送成功，请注意接收验证码')
 
 
 cms_bp.add_url_rule('/login/', view_func=LoginView.as_view('login'))
 cms_bp.add_url_rule('/resetpwd/', view_func=ResetPwdView.as_view('resetpwd'))
 cms_bp.add_url_rule('/resetemail/', view_func=ResetEmailView.as_view('resetemail'))
+cms_bp.add_url_rule('/email_captcha/', view_func=EmailCaptchaView.as_view('email_captcha'))

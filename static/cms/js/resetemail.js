@@ -1,4 +1,4 @@
-var lgajax = {
+var clajax = {
     'get': function (args) {
         args['method'] = 'get';
         this.ajax(args);
@@ -28,10 +28,10 @@ $(function () {
         event.preventDefault();
         var email = $("input[name='email']").val();
         if (!email) {
-            lgalert.alertInfoToast('请输入邮箱');
+            clalert.alertInfoToast('请输入邮箱');
             return;
         }
-        var lgajax = {
+        var clajax = {
             'get': function (args) {
                 args['method'] = 'get';
                 this.ajax(args);
@@ -56,20 +56,20 @@ $(function () {
                 });
             }
         };
-        lgajax.get({
+        clajax.get({
             'url': '/cms/email_captcha/',
             'data': {
                 'email': email
             },
             'success': function (data) {
-                if (data['code'] == 200) {
-                    lgalert.alertSuccessToast('邮件发送成功！请注意查收！');
+                if (data['code'] === 200) {
+                    clalert.alertSuccessToast('邮件发送成功！请注意查收！');
                 } else {
-                    lgalert.alertInfo(data['message']);
+                    clalert.alertInfo(data['message']);
                 }
             },
             'fail': function (error) {
-                lgalert.alertNetworkError();
+                clalert.alertNetworkError();
             }
         });
     });
@@ -84,23 +84,23 @@ $(function () {
         var email = emailE.val();
         var captcha = captchaE.val();
 
-        lgajax.post({
+        clajax.post({
             'url': '/cms/resetemail/',
             'data': {
                 'email': email,
                 'captcha': captcha
             },
             'success': function (data) {
-                if (data['code'] == 200) {
+                if (data['code'] === 200) {
                     emailE.val("");
                     captchaE.val("");
-                    lgalert.alertSuccessToast('恭喜！邮箱修改成功！');
+                    clalert.alertSuccessToast('恭喜！邮箱修改成功！');
                 } else {
-                    lgalert.alertInfo(data['message']);
+                    clalert.alertInfo(data['message']);
                 }
             },
             'fail': function (error) {
-                lgalert.alertNetworkError();
+                clalert.alertNetworkError();
             }
         });
     });

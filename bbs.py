@@ -6,7 +6,7 @@
 
 from flask import Flask
 from flask_wtf import CSRFProtect
-from exts import db
+from exts import db, mail
 from apps.cms.views import cms_bp
 from apps.front.views import front_bp
 import config
@@ -15,8 +15,8 @@ import config
 app = Flask(__name__)
 CSRFProtect(app)
 app.config.from_object(config)
-app.config['TEMPLATE_AUTO_RELOAD'] = True
 db.init_app(app)
+mail.init_app(app)
 
 app.register_blueprint(cms_bp)
 app.register_blueprint(front_bp)
