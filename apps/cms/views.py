@@ -1,21 +1,20 @@
 from flask import Blueprint, render_template, views, request, redirect, url_for, session, g
 from flask_mail import Message
+
 from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm
-from apps.cms.models import CMSUser
+from apps.cms.models import CMSUser, CMSPermission
 from exts import db, mail
 from utils import restful, random_captcha, clcache
-
-# from .decorators import login_required  # .代表当前路径
+from .decorators import permission_required  # .代表当前路径
 
 cms_bp = Blueprint('cms', __name__, url_prefix='/cms')
 
 from .hooks import before_request
 
-
 @cms_bp.route('/')
 # @login_required
 def index():
-    return render_template('cms/cms_index.html')
+    return render_template('cms/cms_index.html', max_role=g.max_role)
 
 
 @cms_bp.route('/logout/')
@@ -28,7 +27,7 @@ def logout():
 
 @cms_bp.route("/profile/")
 def profile():
-    return render_template("cms/cms_profile.html")
+    return render_template("cms/cms_profile.html", max_role=g.max_role)
 
 
 class LoginView(views.MethodView):
@@ -62,7 +61,7 @@ class LoginView(views.MethodView):
 
 class ResetPwdView(views.MethodView):
     def get(self):
-        return render_template('cms/cms_resetpwd.html')
+        return render_template('cms/cms_resetpwd.html', max_role=g.max_role)
 
     def post(self):
         form = ResetPwdForm(request.form)
@@ -85,7 +84,7 @@ class ResetPwdView(views.MethodView):
 
 class ResetEmailView(views.MethodView):
     def get(self):
-        return render_template('cms/cms_resetemail.html')
+        return render_template('cms/cms_resetemail.html', max_role=g.max_role)
 
     def post(self):
         form = ResetEmailForm(request.form)
@@ -114,6 +113,42 @@ class EmailCaptchaView(views.MethodView):
             return restful.server_error('邮件发送异常，请检查重试')
         clcache.save_captcha(email, captcha)
         return restful.success(message='邮件发送成功，请注意接收验证码')
+
+
+@cms_bp.route('/posts/')
+@permission_required(CMSPermission.POSTER)
+def posts():
+    return render_template('cms/cms_posts.html', max_role=g.max_role)
+
+
+@cms_bp.route('/comments/')
+@permission_required(CMSPermission.COMMENTER)
+def comments():
+    return render_template('cms/cms_comments.html', max_role=g.max_role)
+
+
+@cms_bp.route('/boards/')
+@permission_required(CMSPermission.BOARDER)
+def boards():
+    return render_template('cms/cms_boards.html', max_role=g.max_role)
+
+
+@cms_bp.route('/fusers/')
+@permission_required(CMSPermission.FRONTUSER)
+def fusers():
+    return render_template('cms/cms_fusers.html', max_role=g.max_role)
+
+
+@cms_bp.route('/cusers/')
+@permission_required(CMSPermission.CMSUSER)
+def cusers():
+    return render_template('cms/cms_cusers.html', max_role=g.max_role)
+
+
+@cms_bp.route('/croles/')
+@permission_required(CMSPermission.ADMINER)
+def croles():
+    return render_template('cms/cms_croles.html', max_role=g.max_role)
 
 
 cms_bp.add_url_rule('/login/', view_func=LoginView.as_view('login'))

@@ -1,5 +1,5 @@
 from flask import request, session, url_for, redirect, g
-from .models import CMSUser
+from .models import CMSUser, CMSRole, CMSPermission
 from .views import cms_bp
 
 
@@ -18,3 +18,12 @@ def before_request():
         # 使用g对象保存用户
         if user:
             g.cms_user = user
+            roles = user.roles
+            max_permission = max([role.permissions for role in roles])
+            max_role = CMSRole.query.filter_by(permissions=max_permission).first().name
+            g.max_role = max_role
+
+
+@cms_bp.context_processor
+def cms_context_processor():
+    return {'CMSPermission': CMSPermission}

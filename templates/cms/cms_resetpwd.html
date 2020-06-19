@@ -12,6 +12,10 @@
     <script src="{{ url_for('static', filename='cms/js/resetpwd.js') }}"></script>
 {% endblock %}
 
+{% block role %}
+    {{ max_role }}
+{% endblock %}
+
 {% block content %}
     <form action="" method="post">
 {#        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">#}

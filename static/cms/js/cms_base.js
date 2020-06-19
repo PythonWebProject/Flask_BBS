@@ -41,16 +41,16 @@ $(function () {
     } else if (url.indexOf('permissions') >= 0) {
         var permissionManageLi = $('.permission-manage');
         permissionManageLi.addClass('unfold').siblings().removeClass('unfold');
-    } else if (url.indexOf('roles') >= 0) {
+    } else if (url.indexOf('froles') >= 0) {
         var roleManageLi = $('.role-manage');
         roleManageLi.addClass('unfold').siblings().removeClass('unfold');
-    } else if (url.indexOf('users') >= 0) {
+    } else if (url.indexOf('fusers') >= 0) {
         var userManageLi = $('.user-manage');
         userManageLi.addClass('unfold').siblings().removeClass('unfold');
-    } else if (url.indexOf('cmsuser_manage') >= 0) {
+    } else if (url.indexOf('cusers') >= 0) {
         var cmsuserManageLi = $('.cmsuser-manage');
         cmsuserManageLi.addClass('unfold').siblings().removeClass('unfold');
-    } else if (url.indexOf('cmsrole_manage') >= 0) {
+    } else if (url.indexOf('croles') >= 0) {
         var cmsroleManageLi = $('.cmsrole-manage');
         cmsroleManageLi.addClass('unfold').siblings().removeClass('unfold');
     } else if (url.indexOf('comments') >= 0) {

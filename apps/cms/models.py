@@ -32,6 +32,29 @@ class CMSUser(db.Model):
         result = check_password_hash(self.password, raw_password)
         return result
 
+    @property
+    def permissions(self):
+        '''判断用户权限'''
+        if not self.roles:
+            return 0
+
+        all_permissions = 0
+        for role in self.roles:
+            permissions = role.permissions
+            all_permissions |= permissions
+        return all_permissions
+
+    def has_permission(self, permission):
+        '''判断当前用户是否有某个权限'''
+        all_permissions = self.permissions
+        result = all_permissions & permission == permission  # 如果当前用户有某个权限，则他的全部权限与该权限按位与的结果等于该权限本身
+        return result
+
+    @property
+    def is_developer(self):
+        '''判断当前用户是否是开发人员'''
+        return self.has_permission(CMSPermission.ALL_PERMISSION)
+
 
 class CMSPermission(object):
     # 255二进制表示所有权限

@@ -12,6 +12,10 @@
     <script src="{{ url_for('static', filename='cms/js/resetemail.js') }}"></script>
 {% endblock %}
 
+{% block role %}
+    {{ max_role }}
+{% endblock %}
+
 {% block content %}
     <form action="" method="post">
         <div class="form-container">

@@ -8,6 +8,10 @@
     熊熊个人中心
 {% endblock %}
 
+{% block role %}
+    {{ max_role }}
+{% endblock %}
+
 {% block content %}
     {% set user = g.cms_user %}
     <table class="table table-bordered">
@@ -21,11 +25,26 @@
         </tr>
         <tr>
             <td>角色：</td>
-            <td>暂无</td>
+            <td>
+                {% for role in user.roles %}
+                    {{ role.name }}
+                    {% if not loop.last %}
+                        &nbsp;
+                    {% endif %}
+                {% endfor %}
+            </td>
         </tr>
         <tr>
             <td>权限：</td>
-            <td>暂无</td>
+            <td>
+                {% for role in user.roles %}
+                    {{ role.desc }}
+                    {% if not loop.last %}
+                        ；
+                    {% endif %}
+                {% endfor %}
+
+            </td>
         </tr>
         <tr>
             <td>加入时间：</td>
