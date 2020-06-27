@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, views, request, redirect, url_for, session, g
 from flask_mail import Message
+from sqlalchemy import or_
 
-from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm
-from apps.cms.models import CMSUser, CMSPermission
+from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm
+from apps.cms.models import CMSUser, CMSPermission, BannerModel
 from exts import db, mail
 from utils import restful, random_captcha, clcache
 from .decorators import permission_required  # .代表当前路径
@@ -119,6 +120,67 @@ class EmailCaptchaView(views.MethodView):
 @permission_required(CMSPermission.POSTER)
 def posts():
     return render_template('cms/cms_posts.html', max_role=g.max_role)
+
+
+@cms_bp.route('/banners/')
+@permission_required(CMSPermission.BANNER)
+def banners():
+    banners = BannerModel.query.filter(or_(BannerModel.is_delete == 0, BannerModel.is_delete == None)).order_by(BannerModel.priority.desc()).all()
+    return render_template('cms/cms_banners.html', max_role=g.max_role, banners=banners)
+
+
+@cms_bp.route('/abanner/', methods=['POST'])
+def abanner():
+    form = AddBannerForm(request.form)
+    if form.validate():
+        name = form.name.data
+        image_url = form.image_url.data
+        link_url = form.link_url.data
+        priority = form.priority.data
+        banner = BannerModel(name=name, image_url=image_url, link_url=link_url, priority=priority)
+        db.session.add(banner)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_error(message=form.get_error())
+
+
+@cms_bp.route('/ubanner/', methods=['POST'])
+def ubanner():
+    # 根据id修改数据
+    form = UpdateBannerForm(request.form)
+    if form.validate():
+        banner_id = form.banner_id.data
+        name = form.name.data
+        image_url = form.image_url.data
+        link_url = form.link_url.data
+        priority = form.priority.data
+        banner = BannerModel.query.get(banner_id)
+        if banner and banner.is_delete != 1:
+            banner.name = name
+            banner.image_url = image_url
+            banner.link_url = link_url
+            banner.priority = priority
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.params_error(message='轮播图不存在')
+    else:
+        return restful.params_error(form.get_error())
+
+
+@cms_bp.route('/dbanner/', methods=['POST'])
+def dbanner():
+    banner_id = request.form.get('banner_id')
+    if not banner_id:
+        return restful.params_error(message='数据请求有误')
+    banner = BannerModel.query.get(banner_id)
+    if banner and banner.is_delete != 1:
+        banner.is_delete = 1
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_error(message='轮播图不存在')
 
 
 @cms_bp.route('/comments/')

@@ -32,3 +32,7 @@ MAIL_DEFAULT_SENDER = '379869029@qq.com'
 
 # 云片APIKEY
 YP_API = 'edf71361381f31b3957beda37f20xxxx'
+
+# 七牛云密钥
+QN_AK = '_PL7p4sTSlfAKl71hIkuG3F6y18681ZKkNJ3xxxx'
+QN_SK = '4P09jodUqhhEqIOcaqT9daVFmKjCJI3l6gsAxxxx'

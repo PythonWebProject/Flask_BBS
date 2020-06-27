@@ -35,6 +35,9 @@ $(function () {
     } else if (url.indexOf('posts') >= 0) {
         var postManageLi = $('.post-manage');
         postManageLi.addClass('unfold').siblings().removeClass('unfold');
+    } else if (url.indexOf('banners') >= 0) {
+        var postManageLi = $('.banner-manage');
+        postManageLi.addClass('unfold').siblings().removeClass('unfold');
     } else if (url.indexOf('boards') >= 0) {
         var boardManageLi = $('.board-manage');
         boardManageLi.addClass('unfold').siblings().removeClass('unfold');

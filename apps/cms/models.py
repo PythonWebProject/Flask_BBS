@@ -66,20 +66,23 @@ class CMSPermission(object):
     # 管理帖子权限
     POSTER = 0b00000010
 
+    # 管理轮播图
+    BANNER = 0b00000100
+
     # 管理评论权限
-    COMMENTER = 0b00000100
+    COMMENTER = 0b00001000
 
     # 管理板块
-    BOARDER = 0b00001000
+    BOARDER = 0b00010000
 
     # 管理前台用户
-    FRONTUSER = 0b00010000
+    FRONTUSER = 0b00100000
 
     # 管理前台用户
-    CMSUSER = 0b00100000
+    CMSUSER = 0b01000000
 
     # 管理前台用户
-    ADMINER = 0b01000000
+    ADMINER = 0b10000000
 
 
 cms_role_user = db.Table(
@@ -97,3 +100,18 @@ class CMSRole(db.Model):
     permissions = db.Column(db.Integer, default=CMSPermission.VISITOR)
 
     users = db.relationship('CMSUser', secondary=cms_role_user, backref='roles')
+
+
+class BannerModel(db.Model):
+    __tablename__ = 'banner'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(30), nullable=False)
+    # 图片链接
+    image_url = db.Column(db.String(255), nullable=False)
+    # 跳转链接
+    link_url = db.Column(db.String(255), nullable=False)
+    # 优先级
+    priority = db.Column(db.Integer, default=0)
+    create_time = db.Column(db.DateTime, default=datetime.now)
+    # 1表示被删除，0表示未删除，默认为0
+    is_delete = db.Column(db.Integer, default=0)

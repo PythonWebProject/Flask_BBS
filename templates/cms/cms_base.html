@@ -63,6 +63,9 @@
                 {% if user.has_permission(CMSPermission.POSTER) %}
                     <li class="nav-group post-manage"><a href="{{ url_for('cms.posts') }}">帖子管理</a></li>
                 {% endif %}
+                {% if user.has_permission(CMSPermission.BANNER) %}
+                    <li class="banner-manage"><a href="{{ url_for('cms.banners') }}">轮播图管理</a></li>
+                {% endif %}
                 {% if user.has_permission(CMSPermission.COMMENTER) %}
                     <li class="comments-manage"><a href="{{ url_for('cms.comments') }}">评论管理</a></li>
                 {% endif %}

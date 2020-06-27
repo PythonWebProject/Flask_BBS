@@ -2,7 +2,7 @@ from flask_script import Manager
 from bbs import app
 from flask_migrate import Migrate, MigrateCommand
 from exts import db
-from apps.cms.models import CMSUser, CMSRole, CMSPermission
+from apps.cms.models import CMSUser, CMSRole, CMSPermission, BannerModel
 from apps.front.models import FrontUser
 
 manager = Manager(app)
@@ -28,12 +28,12 @@ def create_role():
     visitor.permissions = CMSPermission.VISITOR  # 也可以省去，因为默认权限就是VISITOR
 
     # 运营者
-    operator = CMSRole(name='运营', desc='管理帖子，管理评论，管理前台和后台用户')
+    operator = CMSRole(name='运营', desc='管理帖子，管理评论，管理前台和后台用户，管理轮播图')
     # 有多个权限时，使用或运算表示
-    operator.permissions = CMSPermission.VISITOR | CMSPermission.POSTER | CMSPermission.CMSUSER | CMSPermission.COMMENTER | CMSPermission.FRONTUSER
+    operator.permissions = CMSPermission.VISITOR | CMSPermission.POSTER | CMSPermission.CMSUSER | CMSPermission.COMMENTER | CMSPermission.FRONTUSER | CMSPermission.BANNER
     # 管理员
     admin = CMSRole(name='管理员', desc='拥有本系统大部分权限')
-    admin.permissions = CMSPermission.VISITOR | CMSPermission.POSTER | CMSPermission.CMSUSER | CMSPermission.COMMENTER | CMSPermission.FRONTUSER | CMSPermission.BOARDER
+    admin.permissions = CMSPermission.VISITOR | CMSPermission.POSTER | CMSPermission.CMSUSER | CMSPermission.COMMENTER | CMSPermission.FRONTUSER | CMSPermission.BOARDER | CMSPermission.BANNER
 
     # 开发人员
     developer = CMSRole(name='开发者', desc='拥有所有权限')

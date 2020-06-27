@@ -1,5 +1,5 @@
 from wtforms import Form, StringField, IntegerField, ValidationError
-from wtforms.validators import Email, InputRequired, Length, EqualTo
+from wtforms.validators import Email, InputRequired, Length, EqualTo, URL
 from utils import clcache
 
 
@@ -31,3 +31,14 @@ class ResetEmailForm(BaseForm):
         redis_captcha = clcache.get_captcha(email)
         if not redis_captcha or captcha.lower() != redis_captcha.lower():
             raise ValidationError('邮箱验证码错误')
+
+
+class AddBannerForm(BaseForm):
+    name = StringField(validators=[InputRequired(message='请输入轮播图名称')])
+    image_url = StringField(validators=[InputRequired(message='请输入图片链接'), URL(message='请注意图片链接格式')])
+    link_url = StringField(validators=[InputRequired(message='请输入跳转链接'), URL(message='请注意跳转链接格式')])
+    priority = IntegerField(validators=[InputRequired(message='请输入轮播图优先级')])
+
+
+class UpdateBannerForm(AddBannerForm):
+    banner_id = IntegerField(validators=[InputRequired(message='轮播图不存在')])
