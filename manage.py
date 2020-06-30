@@ -2,7 +2,7 @@ from flask_script import Manager
 from bbs import app
 from flask_migrate import Migrate, MigrateCommand
 from exts import db
-from apps.cms.models import CMSUser, CMSRole, CMSPermission, BannerModel
+from apps.cms.models import CMSUser, CMSRole, CMSPermission, BannerModel, BoardModel
 from apps.front.models import FrontUser
 
 manager = Manager(app)

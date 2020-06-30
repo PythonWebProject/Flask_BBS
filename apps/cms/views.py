@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, views, request, redirect, url_for,
 from flask_mail import Message
 from sqlalchemy import or_
 
-from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm
-from apps.cms.models import CMSUser, CMSPermission, BannerModel
+from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm, AddBoardForm, UpdateBoardForm
+from apps.cms.models import CMSUser, CMSPermission, BannerModel, BoardModel
 from exts import db, mail
 from utils import restful, random_captcha, clcache
 from .decorators import permission_required  # .代表当前路径
@@ -130,6 +130,7 @@ def banners():
 
 
 @cms_bp.route('/abanner/', methods=['POST'])
+@permission_required(CMSPermission.BANNER)
 def abanner():
     form = AddBannerForm(request.form)
     if form.validate():
@@ -146,6 +147,7 @@ def abanner():
 
 
 @cms_bp.route('/ubanner/', methods=['POST'])
+@permission_required(CMSPermission.BANNER)
 def ubanner():
     # 根据id修改数据
     form = UpdateBannerForm(request.form)
@@ -170,6 +172,7 @@ def ubanner():
 
 
 @cms_bp.route('/dbanner/', methods=['POST'])
+@permission_required(CMSPermission.BANNER)
 def dbanner():
     banner_id = request.form.get('banner_id')
     if not banner_id:
@@ -192,7 +195,55 @@ def comments():
 @cms_bp.route('/boards/')
 @permission_required(CMSPermission.BOARDER)
 def boards():
-    return render_template('cms/cms_boards.html', max_role=g.max_role)
+    boards = BoardModel.query.filter(or_(BoardModel.is_delete == 0, BoardModel.is_delete == None)).all()
+    return render_template('cms/cms_boards.html', max_role=g.max_role, boards=boards)
+
+
+@cms_bp.route('/aboard/', methods=['POST'])
+@permission_required(CMSPermission.BOARDER)
+def aboard():
+    form = AddBoardForm(request.form)
+    if form.validate():
+        name = form.name.data
+        board = BoardModel(name=name)
+        db.session.add(board)
+        db.session.commit()
+        return restful.success()
+    else:
+        restful.params_error(message=form.get_error())
+
+
+@cms_bp.route('/uboard/', methods=['POST'])
+@permission_required(CMSPermission.BOARDER)
+def uboard():
+    form = UpdateBoardForm(request.form)
+    if form.validate():
+        board_id = form.board_id.data
+        name = form.name.data
+        board = BoardModel.query.get(board_id)
+        if board and board.is_delete != 1:
+            board.name = name
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.params_error(message='没有该板块')
+    else:
+        return restful.params_error(form.get_error())
+
+
+@cms_bp.route('/dboard/', methods=['POST'])
+@permission_required(CMSPermission.BOARDER)
+def dboard():
+    board_id = request.form.get('board_id')
+    if not board_id:
+        return restful.params_error(message='板块不存在')
+    board = BoardModel.query.get(board_id)
+    if board and board.is_delete != 1:
+        board.is_delete = 1
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_error(message='板块不存在')
 
 
 @cms_bp.route('/fusers/')

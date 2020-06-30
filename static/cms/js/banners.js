@@ -134,7 +134,7 @@ $(function () {
 
 $(function () {
     clqiniu.setUp({
-        'domain': 'http://7xqenu.com1.z0.glb.clouddn.com/',
+        'domain': 'http://qcl1fdftn.bkt.clouddn.com',
         'browse_btn': 'upload-btn',
         'uptoken_url': '/c/uptoken/',
         'success': function (up, file, info) {

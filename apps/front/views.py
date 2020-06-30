@@ -5,6 +5,7 @@ from utils.captcha import Captcha
 from utils import clcache, restful, safe_url
 from .forms import SignupForm, SigninForm
 from .models import FrontUser
+from apps.cms.models import BannerModel
 from exts import db
 
 front_bp = Blueprint('front', __name__)
@@ -12,7 +13,8 @@ front_bp = Blueprint('front', __name__)
 
 @front_bp.route('/')
 def index():
-    return render_template('front/front_index.html')
+    banners = BannerModel.query.order_by(BannerModel.priority.desc()).limit(4)
+    return render_template('front/front_index.html', banners=banners)
 
 
 @front_bp.route('/captcha/')
