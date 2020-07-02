@@ -3,7 +3,7 @@ from functools import wraps
 
 def login_required(func):
     def index(*args, **kwargs):
-        if 'user_id' in session:
+        if 'cms_user_id' in session:
             return func(*args, **kwargs)
         else:
             return redirect(url_for('cms.login'))

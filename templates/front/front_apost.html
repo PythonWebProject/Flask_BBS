@@ -1,0 +1,76 @@
+{% extends 'front/front_base.html' %}
+
+{% block title %}
+    帖子发布
+{% endblock %}
+
+{% block head %}
+    <script type="text/javascript">
+        $(function () {
+            editormd("editor", {
+                height: 640,
+                syncScrolling: "single",
+                path: "{{ url_for('static',filename='editormd/lib/') }}",
+                saveHTMLToTextarea : true,
+                imageUpload: true,
+                imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                imageUploadURL: "{{ url_for('common.edittoken') }}"
+            });
+        });
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='editormd/css/editormd.css') }}"/>
+    <script src="{{ url_for('static', filename='front/js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='editormd/editormd.js') }}"></script>
+    <script src="{{ url_for('static', filename='front/js/front_apost.js') }}"></script>
+{% endblock %}
+
+{% block main_content %}
+    <div class="main-container">
+        <form action="" method="post">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">标题</span>
+                    <input type="text" class="form-control" name="title">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon">板块</span>
+                    <select name="board_id" class="form-control">
+                        {% for board in boards %}
+                            <option value="{{ board.id }}">{{ board.name }}</option>
+                        {% endfor %}
+
+
+                        <option value="">Python数据分析</option>
+                    </select>
+                </div>
+            </div>
+            <div id="editor" class="form-group">
+                <textarea name="content" id="TextContent"></textarea>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-danger" id="submit-btn">发布帖子</button>
+            </div>
+        </form>
+
+        <script type="text/javascript">
+            var testEditor;
+
+            $(function () {
+                testEditor = editormd("editor", {
+                    width: "100%",
+                    height: 640,
+                    syncScrolling: "single",
+                    path: "{{ url_for('static',filename='editormd/lib/') }}",
+                    // 上传图片
+                    imageUpload: true,
+                    imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                    // 上传图片时指定调用后台的视图函数
+                    imageUploadURL: "",
+
+                });
+            });
+        </script>
+    </div>
+{% endblock %}

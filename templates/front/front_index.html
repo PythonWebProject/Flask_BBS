@@ -23,14 +23,14 @@
                     {% for banner in banners %}
                         {% if loop.first %}
                             <div class="item active">
-                                <img src="{{ banner.image_url }}" alt="{{ banner.name }}" width="400px" height="240px">
+                                <img src="{{ banner.image_url }}" alt="{{ banner.name }}" style="width: 400px; height: 240px">
                                 <div class="carousel-caption">
                                     {{ banner.name }}
                                 </div>
                             </div>
                         {% else %}
                             <div class="item">
-                                <img src="{{ banner.image_url }}" alt="{{ banner.name }}" width="400px" height="240px">
+                                <img src="{{ banner.image_url }}" alt="{{ banner.name }}" style="width: 400px; height: 240px">
                                 <div class="carousel-caption">
                                     {{ banner.name }}
                                 </div>
@@ -52,10 +52,59 @@
                     <span class="sr-only">Next</span>
                 </a>
             </div>
+
+            <div class="post-group">
+                <ul class="post-group-head">
+                    <li class=""><a href="#">最新</a></li>
+                    <li class=""><a href="#">精华帖子</a></li>
+                    <li class=""><a href="#">点赞最多</a></li>
+                    <li class=""><a href="#">评论最多</a></li>
+                </ul>
+                <ul class="post-list-group">
+                    {% for post in posts %}
+                    <li>
+                        <div class="author-avatar-group">
+                            <img src="#" alt="">
+                        </div>
+                        <div class="post-info-group">
+                            <p class="post-title">
+                                <a href="#">{{ post.title | truncate(20) }}</a>
+                                <span class="label label-danger">精华帖</span>
+                            </p>
+                            <p class="post-info">
+                                <span>作者: {{ post.author.username | truncate(6) }}</span>
+                                <span>发表时间: {{ post.create_time }}</span>
+                                <span>评论: 0</span>
+                                <span>阅读: 0</span>
+                            </p>
+                        </div>
+                    </li>
+                    {% endfor %}
+
+                </ul>
+                <div style="text-align:center;">
+
+                </div>
+            </div>
         </div>
 
         <div class="sm-container">
+            <div style="padding-bottom:10px;">
+                <a href="{{ url_for('front.apost') }}" class="btn btn-warning btn-block">发布帖子</a>
+            </div>
+            <div class="list-group">
+                <a href="/" class="list-group-item active">所有板块</a>
+                {% for board in boards %}
+                    {% if current_board == board.id %}
+                        <a href="{{ url_for('front.index', board_id=board.id) }}"
+                           class="list-group-item active">{{ board.name }}</a>
+                    {% else %}
+                        <a href="{{ url_for('front.index', board_id=board.id) }}"
+                           class="list-group-item">{{ board.name }}</a>
 
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
     </div>
 {% endblock %}

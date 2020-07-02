@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, ValidationError
+from wtforms import Form, StringField, ValidationError, IntegerField
 from wtforms.validators import Length, EqualTo, Regexp, InputRequired
 from utils import clcache
 
@@ -39,3 +39,9 @@ class SigninForm(BaseForm):
     telephone = StringField(validators=[Regexp(r'1[3-9]\d{9}', message='请输入正确的手机号')])
     password = StringField(validators=[Regexp(r'[0-9a-zA-Z_\.]{6,20}', message='您输入的密码有误，请重新输入')])
     remember = StringField(InputRequired())
+
+
+class AddPostForm(BaseForm):
+    title = StringField(validators=[InputRequired(message='请输入博客标题')])
+    board_id = IntegerField(validators=[InputRequired(message='数据提交有误，请重试')])
+    content = StringField(validators=[InputRequired(message='请输入博客内容')])

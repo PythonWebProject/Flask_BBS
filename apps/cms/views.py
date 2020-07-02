@@ -4,6 +4,7 @@ from sqlalchemy import or_
 
 from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm, AddBoardForm, UpdateBoardForm
 from apps.cms.models import CMSUser, CMSPermission, BannerModel, BoardModel
+from apps.front.models import PostModel
 from exts import db, mail
 from utils import restful, random_captcha, clcache
 from .decorators import permission_required  # .代表当前路径
@@ -21,7 +22,7 @@ def index():
 @cms_bp.route('/logout/')
 def logout():
     # 清空session
-    del session['user_id']
+    del session['cms_user_id']
     # 重定向到登录页面
     return redirect(url_for('cms.login'))
 
@@ -47,7 +48,7 @@ class LoginView(views.MethodView):
             # 根据用户验证密码是否正确
             if user and user.check_password(password):
                 # 将用户id记录入session
-                session['user_id'] = user.id
+                session['cms_user_id'] = user.id
                 # 如果记住密码，需要持久化
                 if remember:
                     session.permanent = True
@@ -119,7 +120,8 @@ class EmailCaptchaView(views.MethodView):
 @cms_bp.route('/posts/')
 @permission_required(CMSPermission.POSTER)
 def posts():
-    return render_template('cms/cms_posts.html', max_role=g.max_role)
+    posts = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).all()
+    return render_template('cms/cms_posts.html', max_role=g.max_role, posts=posts)
 
 
 @cms_bp.route('/banners/')

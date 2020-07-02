@@ -1,9 +1,9 @@
 from qiniu import Auth, put_file, etag
 
-from config import QN_AK, QN_SK
+from config import QINIU_ACCESS_KEY, QINIU_SECRET_KEY
 
 # 构建鉴权对象
-q = Auth(QN_AK, QN_SK)
+q = Auth(QINIU_ACCESS_KEY, QINIU_SECRET_KEY)
 # 要上传的空间
 bucket_name = 'corley-images'
 # 上传后保存的文件名

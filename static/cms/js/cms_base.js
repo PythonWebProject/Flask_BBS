@@ -1,7 +1,7 @@
 $(function () {
     $('.nav-sidebar>li>a').click(function (event) {
         var that = $(this);
-        if (that.children('a').attr('href') == '#') {
+        if (that.children('a').attr('href') === '#') {
             event.preventDefault();
         }
         if (that.parent().hasClass('unfold')) {

@@ -2,6 +2,8 @@ import shortuuid
 import enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from markdown import markdown
+import bleach
 
 from exts import db
 
@@ -48,3 +50,40 @@ class FrontUser(db.Model):
         '''验证密码是否正确'''
         result = check_password_hash(self.password, raw_password)
         return result
+
+
+class PostModel(db.Model):
+    __tablename__ = 'post'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    content_html = db.Column(db.Text)
+    create_time = db.Column(db.DateTime, default=datetime.now)
+
+    board_id = db.Column(db.Integer, db.ForeignKey("cms_board.id"))
+    author_id = db.Column(db.String(40), db.ForeignKey("front_user.id"))
+    # 1表示被删除，0表示未删除，默认为0
+    is_delete = db.Column(db.Integer, default=0)
+
+    board = db.relationship("BoardModel", backref='posts')
+    author = db.relationship("FrontUser", backref='posts')
+
+    def on_changed_content(target, value, oldvalue, initiator):
+        '''实现markdown转HTML并进行安全验证'''
+        # 允许上传的标签
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p', 'img', 'video', 'div', 'iframe', 'p', 'br', 'span', 'hr', 'src', 'class']
+
+        # 允许上传的属性
+        allowed_attrs = {'*': ['class'],
+                         'a': ['href', 'rel'],
+                         'img': ['src', 'alt']}
+
+        # 目标设置
+        target.content_html = bleach.linkify(
+            bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True,
+                         attributes=allowed_attrs))
+
+
+# 数据库事件监听
+db.event.listen(PostModel.content, 'set', PostModel.on_changed_content)

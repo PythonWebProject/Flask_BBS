@@ -33,6 +33,8 @@ MAIL_DEFAULT_SENDER = '379869029@qq.com'
 # 云片APIKEY
 YP_API = 'edf71361381f31b3957beda37f20xxxx'
 
-# 七牛云密钥
-QN_AK = '_PL7p4sTSlfAKl71hIkuG3F6y18681ZKkNJ3xxxx'
-QN_SK = '4P09jodUqhhEqIOcaqT9daVFmKjCJI3l6gsAxxxx'
+# 七牛云存储配置
+QINIU_ACCESS_KEY = '_PL7p4sTSlfAKl71hIkuG3F6y18681ZKkNJ3SRvh'
+QINIU_SECRET_KEY = '4P09jodUqhhEqIOcaqT9daVFmKjCJI3l6gsAw5DQ'
+QINIU_BUCKET_NAME = 'bbs-images'
+QINIU_BUCKET_DOMAIN = 'qcquu7fd2.bkt.clouddn.com'
