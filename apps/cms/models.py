@@ -124,3 +124,12 @@ class BoardModel(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.now)
     # 1表示被删除，0表示未删除，默认为0
     is_delete = db.Column(db.Integer, default=0)
+
+
+class HighlightPostModel(db.Model):
+    __tablename__ = 'highlight_post'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+    create_time = db.Column(db.DateTime, default=datetime.now)
+
+    post = db.relationship('PostModel', backref='highlight')

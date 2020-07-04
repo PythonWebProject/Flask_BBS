@@ -1,9 +1,10 @@
+import random
 from flask_script import Manager
 from bbs import app
 from flask_migrate import Migrate, MigrateCommand
 from exts import db
-from apps.cms.models import CMSUser, CMSRole, CMSPermission, BannerModel, BoardModel
-from apps.front.models import FrontUser, PostModel
+from apps.cms.models import CMSUser, CMSRole, CMSPermission, BannerModel, BoardModel, HighlightPostModel
+from apps.front.models import FrontUser, PostModel, CommentModel
 
 manager = Manager(app)
 Migrate(app, db)
@@ -77,6 +78,20 @@ def create_front_user(telephone, username, password):
     db.session.add(user)
     db.session.commit()
     print('前台用户添加成功')
+
+
+@manager.command
+def test_post_page():
+    for i in range(1, 301):
+        title = 'Title %d' % i
+        content = 'Content %d' % i
+        author = FrontUser.query.first()
+        post = PostModel(title=title, content=content)
+        post.author = author
+        post.board = BoardModel.query.get(random.choice([1, 3, 4]))
+        db.session.add(post)
+    db.session.commit()
+    print('测试文章添加成功')
 
 
 if __name__ == '__main__':

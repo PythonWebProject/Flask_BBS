@@ -1,14 +1,16 @@
-from flask import Blueprint, views, render_template, make_response, request, session, g, redirect, url_for
+from flask import Blueprint, views, render_template, make_response, request, session, g
+from flask_paginate import Pagination, get_page_parameter
 from io import BytesIO
 from sqlalchemy import or_
 
 from utils.captcha import Captcha
 from utils import clcache, restful, safe_url
-from .forms import SignupForm, SigninForm, AddPostForm
-from .models import FrontUser, PostModel
+from .forms import SignupForm, SigninForm, AddPostForm, AddCommentForm
+from .models import FrontUser, PostModel, CommentModel
 from .decorators import login_required
 from apps.cms.models import BannerModel, BoardModel
 from exts import db
+import config
 
 front_bp = Blueprint('front', __name__)
 
@@ -21,12 +23,32 @@ def index():
         BannerModel.priority.desc()).limit(4)
     boards = BoardModel.query.filter(or_(BoardModel.is_delete == 0, BoardModel.is_delete == None)).all()
     board_id = request.args.get('board_id', type=int, default=None)
-    posts = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).all()
+    # 当前页
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    start = (page - 1) * config.PER_PAGE
+    end = start + config.PER_PAGE
+    if board_id:
+        posts = PostModel.query.filter_by(board_id=board_id).filter(
+            or_(PostModel.is_delete == 0, PostModel.is_delete == None)).slice(start, end)
+        total = PostModel.query.filter_by(board_id=board_id).filter(
+            or_(PostModel.is_delete == 0, PostModel.is_delete == None)).count()
+    else:
+        posts = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).slice(start, end)
+        total = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).count()
+    request_arg = request.args.get('board_id')
+    if request_arg:
+        show_all = False
+    else:
+        show_all = True
+
+    pagination = Pagination(page=page, total=total, bs_version=3, per_page=config.PER_PAGE)
     context = {
         'banners': banners,
         'boards': boards,
         'current_board': board_id,
-        'posts': posts
+        'posts': posts,
+        'show_all': show_all,
+        'pagination': pagination
     }
     return render_template('front/front_index.html', **context)
 
@@ -57,11 +79,32 @@ def referer_test():
     return render_template('front/referer_test.html')
 
 
+@front_bp.route('/acomment/', methods=['POST'])
+@login_required
+def add_comment():
+    form = AddCommentForm(request.form)
+    if form.validate():
+        content = form.content.data
+        post_id = form.post_id.data
+        post = PostModel.query.get(post_id)
+        if post and post.id != 1:
+            comment = CommentModel(content=content)
+            comment.post = post
+            comment.commenter = g.front_user
+            db.session.add(comment)
+            db.session.commit()
+            return restful.success()
+        else:
+            return restful.params_error(message='该文章去火星啦😀')
+    else:
+        return restful.params_error(message=form.get_error())
+
+
 class PostView(views.MethodView):
     decorators = [login_required]
 
     def get(self):
-        boards = BoardModel.query.all()
+        boards = BoardModel.query.filter(or_(BoardModel.is_delete == 0, BoardModel.is_delete == None)).all()
         return render_template('front/front_apost.html', boards=boards)
 
     def post(self):
@@ -83,6 +126,15 @@ class PostView(views.MethodView):
                 return restful.params_error(message='没有该板块，请重新选择')
         else:
             return restful.params_error(form.get_error())
+
+
+@front_bp.route('/p/<post_id>/')
+def post_detail(post_id):
+    post = PostModel.query.get(post_id)
+    if post and post.is_delete != 1:
+        return render_template('front/front_pdetail.html', post=post)
+    else:
+        return restful.params_error(message='文章不存在')
 
 
 class SignupView(views.MethodView):

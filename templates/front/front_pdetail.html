@@ -1,0 +1,66 @@
+{% extends 'front/front_base.html' %}
+
+{% block title %}
+    {{ post.title }}
+{% endblock %}
+
+{% block head %}
+    <script src="{{ url_for('static', filename='ueditor/ueditor.config.js') }}"></script>
+    <script src="{{ url_for('static', filename='ueditor/ueditor.all.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='front/css/front_pdetail.css') }}">
+    <script src="{{ url_for('static', filename='front/js/front_pdetail.js') }}"></script>
+{% endblock %}
+
+{% block main_content %}
+    <div class="main-container">
+        <div class="cl-container">
+            <div class="post-container">
+                <h2>{{ post.title }}</h2>
+                <p class="post-info-group">
+                    <span>发表时间：{{ post.create_time }}</span>
+                    <span>作者：{{ post.author.username }}</span>
+                    <span>所属板块：{{ post.board.name }}</span>
+                    <span>阅读数：0</span>
+                    <span>评论数：0</span>
+                </p>
+                <article class="post-content" id="post-content" data-id="{{ post.id }}">
+                    {{ post.content_html | safe }}
+                </article>
+            </div>
+            <div class="comment-group">
+                <h3>评论列表</h3>
+                <ul class="comment-list-group">
+                    {% for commont in post.comments %}
+                        <li>
+                            <div class="avatar-group">
+                                <img src="{{ url_for('static', filename='common/images/logo.png') }}"
+                                     alt="">
+                            </div>
+                            <div class="comment-content">
+                                <p class="author-info">
+                                    <span>{{ commont.commenter.username }}</span>
+                                    <span>{{ commont.create_time }}</span>
+                                </p>
+                                <p class="comment-txt">
+                                    {{ commont.content | safe }}
+                                </p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="add-comment-group">
+                <h3>发表评论</h3>
+                <script id="editor" type="text/plain" style="height:100px;"></script>
+                <!--        <textarea name="content" id="comment" cols="99" rows="10"></textarea>-->
+                <div class="comment-btn-group">
+                    <button class="btn btn-primary" id="comment-btn">发表评论</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sm-container"></div>
+    </div>
+{% endblock %}
+
+

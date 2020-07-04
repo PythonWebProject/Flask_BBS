@@ -87,3 +87,18 @@ class PostModel(db.Model):
 
 # 数据库事件监听
 db.event.listen(PostModel.content, 'set', PostModel.on_changed_content)
+
+
+class CommentModel(db.Model):
+    __tablename__ = 'comment'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    content = db.Column(db.Text, nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now)
+    
+    commenter_id = db.Column(db.String(40), db.ForeignKey('front_user.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+    # 1表示被删除，0表示未删除，默认为0
+    is_delete = db.Column(db.Integer, default=0)
+
+    post = db.relationship('PostModel', backref='comments')
+    commenter = db.relationship('FrontUser', backref='comments')

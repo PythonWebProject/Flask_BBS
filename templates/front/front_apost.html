@@ -40,9 +40,6 @@
                         {% for board in boards %}
                             <option value="{{ board.id }}">{{ board.name }}</option>
                         {% endfor %}
-
-
-                        <option value="">Python数据分析</option>
                     </select>
                 </div>
             </div>
@@ -53,24 +50,5 @@
                 <button class="btn btn-danger" id="submit-btn">发布帖子</button>
             </div>
         </form>
-
-        <script type="text/javascript">
-            var testEditor;
-
-            $(function () {
-                testEditor = editormd("editor", {
-                    width: "100%",
-                    height: 640,
-                    syncScrolling: "single",
-                    path: "{{ url_for('static',filename='editormd/lib/') }}",
-                    // 上传图片
-                    imageUpload: true,
-                    imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
-                    // 上传图片时指定调用后台的视图函数
-                    imageUploadURL: "",
-
-                });
-            });
-        </script>
     </div>
 {% endblock %}

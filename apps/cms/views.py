@@ -3,7 +3,7 @@ from flask_mail import Message
 from sqlalchemy import or_
 
 from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm, AddBoardForm, UpdateBoardForm
-from apps.cms.models import CMSUser, CMSPermission, BannerModel, BoardModel
+from apps.cms.models import CMSUser, CMSPermission, BannerModel, BoardModel, HighlightPostModel
 from apps.front.models import PostModel
 from exts import db, mail
 from utils import restful, random_captcha, clcache
@@ -122,6 +122,54 @@ class EmailCaptchaView(views.MethodView):
 def posts():
     posts = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).all()
     return render_template('cms/cms_posts.html', max_role=g.max_role, posts=posts)
+
+
+@cms_bp.route('/hpost/', methods=['POST'])
+@permission_required(CMSPermission.POSTER)
+def hpost():
+    post_id = request.form.get('post_id')
+    if not post_id:
+        return restful.params_error(message='数据提交有误')
+    post = PostModel.query.get(post_id)
+    if post and post.is_delete != 1:
+        highlight = HighlightPostModel()
+        highlight.post = post
+        db.session.add(highlight)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_error('该文章去火星啦😀')
+
+
+@cms_bp.route('/uhpost/', methods=['POST'])
+@permission_required(CMSPermission.POSTER)
+def uhpost():
+    post_id = request.form.get('post_id')
+    if not post_id:
+        return restful.params_error(message='数据提交有误')
+    post = PostModel.query.get(post_id)
+    if post and post.is_delete != 1:
+        highlight = HighlightPostModel.query.filter_by(post_id=post_id).first()
+        db.session.delete(highlight)
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_error('该文章去火星啦😀')
+
+
+@cms_bp.route('/dpost/', methods=['POST'])
+@permission_required(CMSPermission.POSTER)
+def dpost():
+    post_id = request.form.get('post_id')
+    if not post_id:
+        return restful.params_error(message='数据提交有误')
+    post = PostModel.query.get(post_id)
+    if post and post.is_delete != 1:
+        post.is_delete = 1
+        db.session.commit()
+        return restful.success()
+    else:
+        return restful.params_error('该文章去火星啦😀')
 
 
 @cms_bp.route('/banners/')

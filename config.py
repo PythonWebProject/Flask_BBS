@@ -38,3 +38,6 @@ QINIU_ACCESS_KEY = '_PL7p4sTSlfAKl71hIkuG3F6y18681ZKkNJ3SRvh'
 QINIU_SECRET_KEY = '4P09jodUqhhEqIOcaqT9daVFmKjCJI3l6gsAw5DQ'
 QINIU_BUCKET_NAME = 'bbs-images'
 QINIU_BUCKET_DOMAIN = 'qcquu7fd2.bkt.clouddn.com'
+
+# 分页配置
+PER_PAGE = 10

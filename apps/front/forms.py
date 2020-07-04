@@ -45,3 +45,8 @@ class AddPostForm(BaseForm):
     title = StringField(validators=[InputRequired(message='请输入博客标题')])
     board_id = IntegerField(validators=[InputRequired(message='数据提交有误，请重试')])
     content = StringField(validators=[InputRequired(message='请输入博客内容')])
+
+
+class AddCommentForm(BaseForm):
+    content = StringField(validators=[InputRequired(message='请输入评论内容')])
+    post_id = IntegerField(validators=[InputRequired(message='数据提交有误，请重试')])
