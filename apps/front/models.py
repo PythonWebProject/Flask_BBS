@@ -64,6 +64,9 @@ class PostModel(db.Model):
     author_id = db.Column(db.String(40), db.ForeignKey("front_user.id"))
     # 1表示被删除，0表示未删除，默认为0
     is_delete = db.Column(db.Integer, default=0)
+    read_count = db.Column(db.Integer, default=0)
+    like_count = db.Column(db.Integer, default=0)
+    comment_count = db.Column(db.Integer, default=0)
 
     board = db.relationship("BoardModel", backref='posts')
     author = db.relationship("FrontUser", backref='posts')
@@ -102,3 +105,14 @@ class CommentModel(db.Model):
 
     post = db.relationship('PostModel', backref='comments')
     commenter = db.relationship('FrontUser', backref='comments')
+
+
+class PraiseModel(db.Model):
+    __tablename__ = 'praise'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+    praiser_id = db.Column(db.String(40), db.ForeignKey('front_user.id'))
+
+    post = db.relationship('PostModel', backref='praises')
+    praiser = db.relationship('FrontUser', backref='praises')

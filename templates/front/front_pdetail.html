@@ -8,25 +8,110 @@
     <script src="{{ url_for('static', filename='ueditor/ueditor.config.js') }}"></script>
     <script src="{{ url_for('static', filename='ueditor/ueditor.all.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='front/css/front_pdetail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='praise/css/praise.css') }}">
     <script src="{{ url_for('static', filename='front/js/front_pdetail.js') }}"></script>
+    <script>
+        $(function () {
+            $("#praise").click(function () {
+                var praise_img = $("#praise-img");
+                var text_box = $("#add-num");
+                var praise_txt = $("#praise-txt");
+                var num = parseInt(praise_txt.text());
+                var post_id = $("#post-mh").attr("data-id");
+                if (praise_img.attr("src") === ("/static/praise/images/yizan.png")) {
+                    $(this).html("<img src='{{ url_for('static', filename='praise/images/zan.png') }}' id='praise-img' class='animation' />");
+                    praise_txt.removeClass("hover");
+                    text_box.show().html("<em class='add-animation'>-1</em>");
+                    $(".add-animation").removeClass("hover");
+                    num -= 1;
+                    praise_txt.text(num);
+                    clajax.post({
+                        'url': '/praise/',
+                        'data': {
+                            'is_praised': 1,
+                            'post_id': post_id
+                        },
+                        'success': function (data) {
+                            if (data['code'] === 200) {
+                            } else {
+                                clalert.alertConfirm({
+                                    'msg': '您还未登录，请登录后再点赞!!',
+                                    'cancelText': '继续浏览',
+                                    'confirmText': '先登录再点赞',
+                                    'cancelCallback': function () {
+                                    },
+                                    'confirmCallback': function () {
+                                        window.location = '/signin/';
+                                    }
+                                });
+                            }
+                        }
+                    })
+                } else {
+                    $(this).html("<img src='{{ url_for('static', filename='praise/images/yizan.png') }}' id='praise-img' class='animation' />");
+                    praise_txt.addClass("hover");
+                    text_box.show().html("<em class='add-animation'>+1</em>");
+                    $(".add-animation").addClass("hover");
+                    num += 1;
+                    praise_txt.text(num);
+                    clajax.post({
+                        'url': '/praise/',
+                        'data': {
+                            'is_praised': 0,
+                            'post_id': post_id
+                        },
+                        'success': function (data) {
+                            if (data['code'] === 200) {
+                            } else {
+                                clalert.alertConfirm({
+                                    'msg': '您还未登录，请登录后再点赞!!',
+                                    'cancelText': '继续浏览',
+                                    'confirmText': '先登录再点赞',
+                                    'cancelCallback': function () {
+                                    },
+                                    'confirmCallback': function () {
+                                        window.location = '/signin/';
+                                    }
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+        })
+    </script>
 {% endblock %}
 
 {% block main_content %}
     <div class="main-container">
         <div class="cl-container">
             <div class="post-container">
-                <h2>{{ post.title }}</h2>
+                <h2 id="post-mh" data-id="{{ post.id }}">{{ post.title }}</h2>
                 <p class="post-info-group">
                     <span>发表时间：{{ post.create_time }}</span>
                     <span>作者：{{ post.author.username }}</span>
                     <span>所属板块：{{ post.board.name }}</span>
-                    <span>阅读数：0</span>
-                    <span>评论数：0</span>
+                    <span>阅读数：{{ post.read_count }}</span>
+                    <span>评论数：{{ post.comment_count }}</span>
                 </p>
                 <article class="post-content" id="post-content" data-id="{{ post.id }}">
                     {{ post.content_html | safe }}
                 </article>
             </div>
+
+            <div class="praise">
+                {% if praise %}
+                    <span id="praise"><img src="{{ url_for('static', filename='praise/images/yizan.png') }}"
+                                           id="praise-img"/></span>
+                {% else %}
+                    <span id="praise"><img src="{{ url_for('static', filename='praise/images/zan.png') }}"
+                                           id="praise-img"/></span>
+                {% endif %}
+
+                <span id="praise-txt">{{ post.like_count }}</span>
+                <span id="add-num"><em>+1</em></span>
+            </div>
+
             <div class="comment-group">
                 <h3>评论列表</h3>
                 <ul class="comment-list-group">

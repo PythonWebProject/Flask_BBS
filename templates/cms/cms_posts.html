@@ -30,7 +30,8 @@
         <tbody>
         {% for post in posts %}
             <tr data-id="{{ post.id }}" data-highlight="{{ 1 if post.highlight else 0 }}">
-                <td><a target="_blank" href="{{ url_for('front.post_detail', post_id=post.id) }}">{{ post.title }}</a></td>
+                <td><a target="_blank" href="{{ url_for('front.post_detail', post_id=post.id) }}">{{ post.title }}</a>
+                </td>
                 <td>{{ post.create_time }}</td>
                 <td>{{ post.board.name }}</td>
                 <td>{{ post.author.username }}</td>
@@ -47,4 +48,7 @@
         {% endfor %}
         </tbody>
     </table>
+    <div style="text-align:center;">
+        {{ pagination.links }}
+    </div>
 {% endblock %}

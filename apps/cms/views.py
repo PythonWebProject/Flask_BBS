@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, views, request, redirect, url_for, session, g
 from flask_mail import Message
+from flask_paginate import Pagination, get_page_parameter
 from sqlalchemy import or_
 
 from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm, AddBannerForm, UpdateBannerForm, AddBoardForm, UpdateBoardForm
@@ -8,6 +9,8 @@ from apps.front.models import PostModel
 from exts import db, mail
 from utils import restful, random_captcha, clcache
 from .decorators import permission_required  # .代表当前路径
+from task import send_mail_celery
+import config
 
 cms_bp = Blueprint('cms', __name__, url_prefix='/cms')
 
@@ -108,8 +111,7 @@ class EmailCaptchaView(views.MethodView):
         # 发送邮件验证码，可以是4位或6位的数字与英文组合
         captcha = random_captcha.get_random_captcha(4)
         try:
-            message = Message('熊熊论坛验证码', recipients=[email], body='您正在进行更改邮箱验证，验证码是%s，5分钟内有效，请及时输入、注意保密。' % captcha)
-            mail.send(message)
+            send_mail_celery.delay('熊熊论坛验证码', recipients=[email], body='您正在进行更改邮箱验证，验证码是%s，5分钟内有效，请及时输入、注意保密。' % captcha)
         except Exception as e:
             print(e.args[0])
             return restful.server_error('邮件发送异常，请检查重试')
@@ -120,8 +122,15 @@ class EmailCaptchaView(views.MethodView):
 @cms_bp.route('/posts/')
 @permission_required(CMSPermission.POSTER)
 def posts():
-    posts = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).all()
-    return render_template('cms/cms_posts.html', max_role=g.max_role, posts=posts)
+    query_obj = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None))
+    # posts = query_obj.all()
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    start = (page - 1) * config.CMS_PER_PAGE
+    end = start + config.CMS_PER_PAGE
+    posts = query_obj.slice(start, end)
+    total = query_obj.count()
+    pagination = Pagination(page=page, total=total, bs_version=4, per_page=config.CMS_PER_PAGE)
+    return render_template('cms/cms_posts.html', max_role=g.max_role, posts=posts, pagination=pagination)
 
 
 @cms_bp.route('/hpost/', methods=['POST'])

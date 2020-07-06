@@ -4,7 +4,7 @@ from bbs import app
 from flask_migrate import Migrate, MigrateCommand
 from exts import db
 from apps.cms.models import CMSUser, CMSRole, CMSPermission, BannerModel, BoardModel, HighlightPostModel
-from apps.front.models import FrontUser, PostModel, CommentModel
+from apps.front.models import FrontUser, PostModel, CommentModel, PraiseModel
 
 manager = Manager(app)
 Migrate(app, db)

@@ -57,10 +57,27 @@
 
             <div class="post-group">
                 <ul class="post-group-head">
-                    <li class=""><a href="#">最新</a></li>
-                    <li class=""><a href="#">精华帖子</a></li>
-                    <li class=""><a href="#">点赞最多</a></li>
-                    <li class=""><a href="#">评论最多</a></li>
+                    {% if current_sort == 1 %}
+                        <li class="active"><a href="{{ url_for('front.index', st=1, board_id=current_board) }}">最新</a></li>
+                    {% else %}
+                        <li class=""><a href="{{ url_for('front.index', st=1, board_id=current_board) }}">最新</a></li>
+                    {% endif %}
+
+                    {% if current_sort == 2 %}
+                        <li class="active"><a href="{{ url_for('front.index', st=2, board_id=current_board) }}">精华帖子</a></li>
+                    {% else %}
+                        <li class=""><a href="{{ url_for('front.index', st=2, board_id=current_board) }}">精华帖子</a></li>
+                    {% endif %}
+                    {% if current_sort == 3 %}
+                        <li class="active"><a href="{{ url_for('front.index', st=3, board_id=current_board) }}">点赞最多</a></li>
+                    {% else %}
+                        <li class=""><a href="{{ url_for('front.index', st=3, board_id=current_board) }}">点赞最多</a></li>
+                    {% endif %}
+                    {% if current_sort == 4 %}
+                        <li class="active"><a href="{{ url_for('front.index', st=4, board_id=current_board) }}">评论最多</a></li>
+                    {% else %}
+                        <li class=""><a href="{{ url_for('front.index', st=4, board_id=current_board) }}">评论最多</a></li>
+                    {% endif %}
                 </ul>
                 <ul class="post-list-group">
                     {% for post in posts %}
@@ -79,8 +96,9 @@
                                 <p class="post-info">
                                     <span>作者：{{ post.author.username | truncate(6) }}</span>
                                     <span>发表时间：{{ post.create_time }}</span>
-                                    <span>评论：0</span>
-                                    <span>阅读：0</span>
+                                    <span>阅读：{{ post.read_count }}</span>
+                                    <span>点赞：{{ post.like_count }}</span>
+                                    <span>评论：{{ post.comment_count }}</span>
                                 </p>
                             </div>
                         </li>
@@ -99,17 +117,17 @@
             </div>
             <div class="list-group">
                 {% if show_all %}
-                    <a href="/" class="list-group-item active">所有板块</a>
+                    <a href="{{ url_for('front.index', st=current_sort) }}" class="list-group-item active">所有板块</a>
                 {% else %}
-                    <a href="/" class="list-group-item">所有板块</a>
+                    <a href="{{ url_for('front.index', st=current_sort) }}" class="list-group-item">所有板块</a>
                 {% endif %}
 
                 {% for board in boards %}
                     {% if current_board == board.id %}
-                        <a href="{{ url_for('front.index', board_id=board.id) }}"
+                        <a href="{{ url_for('front.index', st=current_sort, board_id=board.id) }}"
                            class="list-group-item active">{{ board.name }}</a>
                     {% else %}
-                        <a href="{{ url_for('front.index', board_id=board.id) }}"
+                        <a href="{{ url_for('front.index', st=current_sort, board_id=board.id) }}"
                            class="list-group-item">{{ board.name }}</a>
 
                     {% endif %}

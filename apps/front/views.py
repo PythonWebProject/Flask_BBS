@@ -1,14 +1,15 @@
-from flask import Blueprint, views, render_template, make_response, request, session, g
+from flask import Blueprint, views, render_template, make_response, request, session, g, redirect, url_for
 from flask_paginate import Pagination, get_page_parameter
 from io import BytesIO
 from sqlalchemy import or_
+from sqlalchemy.sql import func
 
 from utils.captcha import Captcha
 from utils import clcache, restful, safe_url
 from .forms import SignupForm, SigninForm, AddPostForm, AddCommentForm
-from .models import FrontUser, PostModel, CommentModel
+from .models import FrontUser, PostModel, CommentModel, PraiseModel
 from .decorators import login_required
-from apps.cms.models import BannerModel, BoardModel
+from apps.cms.models import BannerModel, BoardModel, HighlightPostModel
 from exts import db
 import config
 
@@ -27,14 +28,28 @@ def index():
     page = request.args.get(get_page_parameter(), type=int, default=1)
     start = (page - 1) * config.PER_PAGE
     end = start + config.PER_PAGE
+    sort = request.args.get('st', type=int, default=1)
+    query_obj = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None))
+    # 最新文章
+    if sort == 1:
+        query_obj = query_obj.order_by(PostModel.create_time.desc())
+    # 精华帖
+    elif sort == 2:
+        query_obj = db.session.query(PostModel).join(HighlightPostModel).order_by(HighlightPostModel.create_time.desc()).filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None))
+    # 点赞最多
+    elif sort == 3:
+        query_obj = query_obj.order_by(PostModel.like_count.desc())
+    # 评论最多
+    elif sort == 4:
+        query_obj = db.session.query(PostModel).join(CommentModel).filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).group_by(PostModel.id).order_by(func.count(CommentModel.id).desc())
+
     if board_id:
-        posts = PostModel.query.filter_by(board_id=board_id).filter(
-            or_(PostModel.is_delete == 0, PostModel.is_delete == None)).slice(start, end)
-        total = PostModel.query.filter_by(board_id=board_id).filter(
-            or_(PostModel.is_delete == 0, PostModel.is_delete == None)).count()
+        query_obj = query_obj.filter(PostModel.board_id==board_id)
+        posts = query_obj.slice(start, end)
+        total = query_obj.count()
     else:
-        posts = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).slice(start, end)
-        total = PostModel.query.filter(or_(PostModel.is_delete == 0, PostModel.is_delete == None)).count()
+        posts = query_obj.slice(start, end)
+        total = query_obj.count()
     request_arg = request.args.get('board_id')
     if request_arg:
         show_all = False
@@ -48,7 +63,8 @@ def index():
         'current_board': board_id,
         'posts': posts,
         'show_all': show_all,
-        'pagination': pagination
+        'pagination': pagination,
+        'current_sort': sort
     }
     return render_template('front/front_index.html', **context)
 
@@ -92,6 +108,7 @@ def add_comment():
             comment.post = post
             comment.commenter = g.front_user
             db.session.add(comment)
+            post.comment_count += 1
             db.session.commit()
             return restful.success()
         else:
@@ -132,9 +149,41 @@ class PostView(views.MethodView):
 def post_detail(post_id):
     post = PostModel.query.get(post_id)
     if post and post.is_delete != 1:
-        return render_template('front/front_pdetail.html', post=post)
+        # 阅读数增加
+        post.read_count += 1
+        db.session.commit()
+        if hasattr(g, 'front_user'):
+            praise = PraiseModel.query.filter_by(post_id=post_id).filter_by(praiser_id=g.front_user.id).first()
+            if praise:
+                return render_template('front/front_pdetail.html', post=post, praise=1)
+        return render_template('front/front_pdetail.html', post=post, praise=0)
     else:
         return restful.params_error(message='文章不存在')
+
+
+@front_bp.route('/praise/', methods=['POST'])
+def praise():
+    if hasattr(g, 'front_user'):
+        is_praise = request.form.get('is_praised', type=int, default=0)
+        post_id = request.form.get('post_id', type=int, default=None)
+        post = PostModel.query.get(post_id)
+        if post and post.is_delete != 1:
+            print('isd: ', is_praise)
+            if is_praise:
+                post.like_count -= 1
+                praise = PraiseModel.query.filter_by(post_id=post_id).filter_by(praiser_id=g.front_user.id).first()
+                db.session.delete(praise)
+                db.session.commit()
+            else:
+                post.like_count += 1
+                praise = PraiseModel(post_id=post_id, praiser_id=g.front_user.id)
+                db.session.add(praise)
+                db.session.commit()
+            return restful.success()
+        else:
+            return restful.params_error(message='文章不存在')
+    else:
+        return redirect(url_for('front.signin'))
 
 
 class SignupView(views.MethodView):
