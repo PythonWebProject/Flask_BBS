@@ -22,7 +22,7 @@ Flask-WTF==0.14.3
 future==0.18.2
 idna==2.9
 itsdangerous==1.1.0
-Jinja2==2.11.2
+Jinja2==2.11.3
 kombu==4.6.11
 Mako==1.1.2
 Markdown==3.2.2
